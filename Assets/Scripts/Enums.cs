@@ -11,6 +11,7 @@
         
     public enum CardType
     {
+        NONE,
         ZERO,
         ONE,
         TWO,

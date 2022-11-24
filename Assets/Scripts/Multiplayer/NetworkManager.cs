@@ -10,6 +10,7 @@ namespace UNO.Multiplayer
     public enum ServerToClientMessageId : ushort
     {
         StartGame = 1,
+        Cards
     }
 
     public enum ClientToServerMessageId : ushort

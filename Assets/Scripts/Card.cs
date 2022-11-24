@@ -1,8 +1,9 @@
-﻿using UnityEngine;
+﻿using System;
 using UNO.Enums;
 
 namespace UNO.General
 {
+    [Serializable]
     public class Card
     {
         public Card(CardColour colour, CardType type)

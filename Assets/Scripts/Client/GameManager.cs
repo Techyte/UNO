@@ -1,77 +1,26 @@
+using Riptide;
 using System.Collections.Generic;
 using UnityEngine;
 using UNO.General;
 using UNO.Multiplayer;
-using Riptide;
 
-namespace UNO.Server
+namespace UNO.Client
 {
     public class GameManager : MonoBehaviour
     {
-        // Use this for getting data about things like players and stuff
-        private NetworkManager _networkManager;
+        public static GameManager Instance { get; private set; }
 
-        private List<UNOPlayer> players = new List<UNOPlayer>();
-
-        [SerializeField] private Deck deck = new Deck(true);
-        
         [Header("Prefabs")]
         [SerializeField] private CardPrefabManager cardPrefabManagerBase;
         [Space]
         [Header("Assignments")]
         [SerializeField] private GameObject cardHolder;
-        [Space]
-        [Header("Readouts")]
-        [SerializeField] private int turnIndex = 0;
+
+        private UNOPlayer player;
 
         private void Awake()
         {
-            _networkManager = FindObjectOfType<NetworkManager>();
-        }
-
-        private void Start()
-        {   
-            for (int i = 0; i < _networkManager.Server.ClientCount; i++)
-            {
-                players.Add(new UNOPlayer(_networkManager.Server.Clients[i].Id));
-            }
-
-            for (int i = 0; i < players.Count; i++)
-            {
-                List<Card> randomCards = new List<Card>();
-                for (int j = 0; j < 5; j++)
-                {
-                    randomCards.Add(deck.Draw());
-                }
-                players[i].Hand = randomCards;
-
-                for (int j = 0; j < players[i].Hand.Count; j++)
-                {
-                    Debug.Log(players[i].Hand[j].colour);
-                }
-                if(i == 0)
-                {
-                    UpdateCards();
-                }
-                else
-                {
-                    SendCardInformation((ushort)i);
-                }
-            }
-        }
-
-        private void SetTurn(int index)
-        {
-            turnIndex = index;
-            if(turnIndex == 0)
-            {
-                // Hosts turn
-            }
-        }
-
-        public void PlayCard(int index)
-        {
-
+            Instance = this;
         }
 
         private void UpdateCards()
@@ -81,12 +30,12 @@ namespace UNO.Server
                 Destroy(card.gameObject);
             }
 
-            for (int i = 0; i < players[0].Hand.Count; i++)
+            for (int i = 0; i < player.Hand.Count; i++)
             {
                 CardPrefabManager card = Instantiate(cardPrefabManagerBase.GetComponent<CardPrefabManager>());
                 card.transform.parent = cardHolder.transform;
 
-                switch (players[0].Hand[i].colour)
+                switch (player.Hand[i].colour)
                 {
                     case Enums.CardColour.NONE:
                         card.cardImage.color = Color.black;
@@ -105,7 +54,7 @@ namespace UNO.Server
                         break;
                 }
 
-                switch (players[0].Hand[i].type)
+                switch (player.Hand[i].type)
                 {
                     case Enums.CardType.ZERO:
                         card.numberText.text = "0";
@@ -151,7 +100,7 @@ namespace UNO.Server
                         break;
                 }
 
-                switch (players[0].Hand[i].secondaryType)
+                switch (player.Hand[i].secondaryType)
                 {
                     case Enums.CardType.DRAWFOUR:
                         card.numberText.text = "DRAW 4";
@@ -163,20 +112,13 @@ namespace UNO.Server
             }
         }
 
-        private void SendCardInformation(ushort id)
+        [MessageHandler((ushort)ServerToClientMessageId.Cards)]
+        private static void UpdatedHandMessage(Message message)
         {
-            Message message = Message.Create(MessageSendMode.Reliable, ServerToClientMessageId.Cards);
-            message.AddCards(players[id].Hand);
+            List<Card> cards = message.GetCards();
 
-            _networkManager.Server.Send(message, id);
-        }
-
-        private void Update()
-        {
-            if(turnIndex == 0)
-            {
-                // Hosts turn to play
-            }
+            Instance.player.Hand = cards;
+            Instance.UpdateCards();
         }
     }
 }
