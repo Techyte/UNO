@@ -1,6 +1,7 @@
 using Riptide;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 using UNO.General;
 using UNO.Multiplayer;
 
@@ -41,6 +42,8 @@ namespace UNO.Client
             for (int i = 0; i < player.Hand.Count; i++)
             {
                 CardPrefabManager card = Instantiate(cardPrefabManagerBase.GetComponent<CardPrefabManager>(), cardHolder.transform);
+
+                card.GetComponent<Button>().onClick.AddListener(delegate { PlayCard(i); });
 
                 switch (player.Hand[i].colour)
                 {
@@ -112,11 +115,19 @@ namespace UNO.Client
                     case Enums.CardType.DRAWFOUR:
                         card.numberText.text = "DRAW 4";
                         break;
-                    case Enums.CardType.SHUFFEL:
-                        card.numberText.text = "SHUFFEL";
+                    case Enums.CardType.SHUFFLE:
+                        card.numberText.text = "SHUFFLE";
                         break;
                 }
             }
+        }
+
+        private void PlayCard(int cardIndex)
+        {
+            Message message = Message.Create(MessageSendMode.Reliable, ClientToServerMessageId.Move);
+            message.AddUShort((ushort)cardIndex);
+            
+            _networkManager.Client.Send(message);
         }
 
         [MessageHandler((ushort)ServerToClientMessageId.Cards)]
@@ -130,5 +141,7 @@ namespace UNO.Client
                 Instance.UpdateCards();
             }
         }
+        
+        // TODO: Receive a bunch of messages from the server about cards and turns
     }
 }

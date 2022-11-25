@@ -46,5 +46,17 @@ namespace UNO.Multiplayer
 
             return cards;
         }
+
+        public static void AddCard(this Message message, Card card)
+        {
+            message.AddUShort((ushort)card.colour);
+            message.AddUShort((ushort)card.type);
+            message.AddUShort((ushort)card.secondaryType);
+        }
+
+        public static Card GetCard(this Message message)
+        {
+            return new Card((Enums.CardColour)message.GetUShort(), (Enums.CardType)message.GetUShort(), (Enums.CardType)message.GetUShort());
+        }
     }
 }

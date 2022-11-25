@@ -26,7 +26,7 @@ namespace UNO.Server
             new Card(CardColour.NONE, CardType.WILD, CardType.DRAWFOUR),
             new Card(CardColour.NONE, CardType.WILD, CardType.DRAWFOUR),
             new Card(CardColour.NONE, CardType.WILD, CardType.DRAWFOUR),
-            new Card(CardColour.NONE, CardType.WILD, CardType.SHUFFEL),
+            new Card(CardColour.NONE, CardType.WILD, CardType.SHUFFLE),
             new Card(CardColour.RED, CardType.ZERO),
             new Card(CardColour.RED, CardType.ONE),
             new Card(CardColour.RED, CardType.ONE),

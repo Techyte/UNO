@@ -27,6 +27,6 @@
         DRAWTWO,
         WILD,
         DRAWFOUR,
-        SHUFFEL
+        SHUFFLE
     }
 }

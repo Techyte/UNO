@@ -10,12 +10,17 @@ namespace UNO.Multiplayer
     public enum ServerToClientMessageId : ushort
     {
         StartGame = 1,
-        Cards
+        Cards,
+        NewTurn,
+        PlayerPlayed,
+        OtherPlayerPlayed,
+        WildSelect,
     }
 
     public enum ClientToServerMessageId : ushort
     {
         Name = 100,
+        Move,
     }
 
     public class NetworkManager : MonoBehaviour

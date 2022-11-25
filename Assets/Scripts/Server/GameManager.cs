@@ -3,11 +3,15 @@ using UnityEngine;
 using UNO.General;
 using UNO.Multiplayer;
 using Riptide;
+using UnityEngine.UI;
+using UNO.Enums;
 
 namespace UNO.Server
 {
     public class GameManager : MonoBehaviour
     {
+        public static GameManager Instance { get; private set; }
+        
         // Use this for getting data about things like players and stuff
         private NetworkManager _networkManager;
 
@@ -24,8 +28,12 @@ namespace UNO.Server
         [Header("Readouts")]
         [SerializeField] private int turnIndex = 0;
 
+        [SerializeField] private Card topCard;
+        [SerializeField] private CardColour currentColour;
+
         private void Awake()
         {
+            Instance = this;
             _networkManager = FindObjectOfType<NetworkManager>();
         }
 
@@ -55,18 +63,15 @@ namespace UNO.Server
             UpdateCards();
         }
 
-        private void SetTurn(int index)
+        private void NewTurn(int index)
         {
-            turnIndex = index;
+            turnIndex = (index + index) % _networkManager.Server.ClientCount;
             if(turnIndex == 0)
             {
                 // Hosts turn
             }
-        }
-
-        public void PlayCard(int index)
-        {
-
+            
+            // TODO: Send new turn message
         }
 
         private void UpdateCards()
@@ -80,80 +85,137 @@ namespace UNO.Server
             {
                 CardPrefabManager card = Instantiate(cardPrefabManagerBase.GetComponent<CardPrefabManager>(), cardHolder.transform);
 
+                card.GetComponent<Button>().onClick.AddListener(delegate { PlayCard(0, i); });
+
                 switch (players[0].Hand[i].colour)
                 {
-                    case Enums.CardColour.NONE:
+                    case CardColour.NONE:
                         card.cardImage.color = Color.black;
                         break;
-                    case Enums.CardColour.RED:
+                    case CardColour.RED:
                         card.cardImage.color = Color.red;
                         break;
-                    case Enums.CardColour.GREEN:
+                    case CardColour.GREEN:
                         card.cardImage.color = Color.green;
                         break;
-                    case Enums.CardColour.BLUE:
+                    case CardColour.BLUE:
                         card.cardImage.color = Color.blue;
                         break;
-                    case Enums.CardColour.YELLOW:
+                    case CardColour.YELLOW:
                         card.cardImage.color = Color.yellow;
                         break;
                 }
 
                 switch (players[0].Hand[i].type)
                 {
-                    case Enums.CardType.ZERO:
+                    case CardType.ZERO:
                         card.numberText.text = "0";
                         break;
-                    case Enums.CardType.ONE:
+                    case CardType.ONE:
                         card.numberText.text = "1";
                         break;
-                    case Enums.CardType.TWO:
+                    case CardType.TWO:
                         card.numberText.text = "2";
                         break;
-                    case Enums.CardType.THREE:
+                    case CardType.THREE:
                         card.numberText.text = "3";
                         break;
-                    case Enums.CardType.FOUR:
+                    case CardType.FOUR:
                         card.numberText.text = "4";
                         break;
-                    case Enums.CardType.FIVE:
+                    case CardType.FIVE:
                         card.numberText.text = "5";
                         break;
-                    case Enums.CardType.SIX:
+                    case CardType.SIX:
                         card.numberText.text = "6";
                         break;
-                    case Enums.CardType.SEVEN:
+                    case CardType.SEVEN:
                         card.numberText.text = "7";
                         break;
-                    case Enums.CardType.EIGHT:
+                    case CardType.EIGHT:
                         card.numberText.text = "8";
                         break;
-                    case Enums.CardType.NINE:
+                    case CardType.NINE:
                         card.numberText.text = "9";
                         break;
-                    case Enums.CardType.SKIP:
+                    case CardType.SKIP:
                         card.numberText.text = "SKIP";
                         break;
-                    case Enums.CardType.REVERSE:
+                    case CardType.REVERSE:
                         card.numberText.text = "REVERSE";
                         break;
-                    case Enums.CardType.WILD:
+                    case CardType.WILD:
                         card.numberText.text = "WILD";
                         break;
-                    case Enums.CardType.DRAWTWO:
+                    case CardType.DRAWTWO:
                         card.numberText.text = "DRAW 2";
                         break;
                 }
 
                 switch (players[0].Hand[i].secondaryType)
                 {
-                    case Enums.CardType.DRAWFOUR:
+                    case CardType.DRAWFOUR:
                         card.numberText.text = "DRAW 4";
                         break;
-                    case Enums.CardType.SHUFFEL:
-                        card.numberText.text = "SHUFFEL";
+                    case CardType.SHUFFLE:
+                        card.numberText.text = "SHUFFLE";
                         break;
                 }
+            }
+        }
+
+        private void PlayCard(int playerId, int cardIndex)
+        {
+            Card card = players[playerId].Hand[cardIndex];
+
+            bool sameColour = card.colour == currentColour;
+            bool sameType = card.type == topCard.type;
+            bool isWild = card.secondaryType != CardType.NONE;
+            
+            bool canPlayCard = sameColour || sameType || isWild;
+
+            if (canPlayCard)
+            {
+                bool skipped = false;
+                
+                if (isWild)
+                {
+                    switch (card.type)
+                    {
+                        case CardType.WILD:
+                            CardLogic.Wild(this);
+                            break;
+                        case CardType.DRAWFOUR:
+                            CardLogic.DrawFour(this);
+                            break;
+                        case CardType.SHUFFLE:
+                            CardLogic.Shuffle(this);
+                            break;
+                    }
+                }
+                else
+                {
+                    switch (card.type)
+                    {
+                        case CardType.SKIP:
+                            skipped = true;
+                            CardLogic.Skip(this);
+                            break;
+                        case CardType.DRAWTWO:
+                            CardLogic.DrawTwo(this);
+                            break;
+                    }
+                }
+
+                if (!skipped)
+                {
+                    NewTurn(1);
+                }
+                
+                // TODO: Set the top card to the new card and set the colour to the new colour
+                // TODO: If the card was not played by the host, send a message to them saying it was
+                // TODO: Send a message to everyone expect for the host and person that made played the card telling them about the move
+                // TODO: Send a message to everyone about the new turn
             }
         }
 
@@ -171,6 +233,14 @@ namespace UNO.Server
             {
                 // Hosts turn to play
             }
+        }
+        
+        // TODO: Receive Move Messages
+
+        [MessageHandler((ushort)ClientToServerMessageId.Move)]
+        private static void PlayerMoved(Message message, ushort fromClientId)
+        {
+            //Instance.PlayCard();
         }
     }
 }
