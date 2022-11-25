@@ -1,5 +1,6 @@
 ﻿using Riptide;
 using System.Collections.Generic;
+using UnityEngine;
 using UNO.General;
 
 namespace UNO.Multiplayer
@@ -8,18 +9,26 @@ namespace UNO.Multiplayer
     {
         public static void AddCards(this Message message, List<Card> cards)
         {
+            ushort[] colours = new ushort[cards.Count];
+            ushort[] types = new ushort[cards.Count];
+            ushort[] secondaryTypes = new ushort[cards.Count];
+
             for (int i = 0; i < cards.Count; i++)
             {
-                message.AddUShort((ushort)cards[i].colour);
+                colours[i] = (ushort)cards[i].colour;
             }
             for (int i = 0; i < cards.Count; i++)
             {
-                message.AddUShort((ushort)cards[i].type);
+                types[i] = (ushort)cards[i].type;
             }
             for (int i = 0; i < cards.Count; i++)
             {
-                message.AddUShort((ushort)cards[i].secondaryType);
+                secondaryTypes[i] = (ushort)cards[i].secondaryType;
             }
+
+            message.AddUShorts(colours);
+            message.AddUShorts(types);
+            message.AddUShorts(secondaryTypes);
         }
 
         public static List<Card> GetCards(this Message message)
@@ -32,7 +41,7 @@ namespace UNO.Multiplayer
 
             for (int i = 0; i < colours.Length; i++)
             {
-                cards.Add(new Card((UNO.Enums.CardColour)colours[i], (UNO.Enums.CardType)types[i], (UNO.Enums.CardType)secondaryTypes[i]));
+                cards.Add(new Card((Enums.CardColour)colours[i], (Enums.CardType)types[i], (Enums.CardType)secondaryTypes[i]));  
             }
 
             return cards;

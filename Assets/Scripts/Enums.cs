@@ -1,6 +1,6 @@
 ﻿namespace UNO.Enums
 {
-    public enum CardColour
+    public enum CardColour : ushort
     {
         NONE,
         RED,
@@ -9,7 +9,7 @@
         BLUE
     }
         
-    public enum CardType
+    public enum CardType : ushort
     {
         NONE,
         ZERO,

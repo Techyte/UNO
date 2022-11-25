@@ -43,21 +43,16 @@ namespace UNO.Server
                 {
                     randomCards.Add(deck.Draw());
                 }
+                
                 players[i].Hand = randomCards;
-
-                for (int j = 0; j < players[i].Hand.Count; j++)
+                
+                if(players[i].networkClientId != 1)
                 {
-                    Debug.Log(players[i].Hand[j].colour);
-                }
-                if(i == 0)
-                {
-                    UpdateCards();
-                }
-                else
-                {
-                    SendCardInformation((ushort)i);
+                    SendCardInformation(players[i].networkClientId, i);
                 }
             }
+            
+            UpdateCards();
         }
 
         private void SetTurn(int index)
@@ -83,8 +78,7 @@ namespace UNO.Server
 
             for (int i = 0; i < players[0].Hand.Count; i++)
             {
-                CardPrefabManager card = Instantiate(cardPrefabManagerBase.GetComponent<CardPrefabManager>());
-                card.transform.parent = cardHolder.transform;
+                CardPrefabManager card = Instantiate(cardPrefabManagerBase.GetComponent<CardPrefabManager>(), cardHolder.transform);
 
                 switch (players[0].Hand[i].colour)
                 {
@@ -163,10 +157,10 @@ namespace UNO.Server
             }
         }
 
-        private void SendCardInformation(ushort id)
+        private void SendCardInformation(ushort id, int playerId)
         {
             Message message = Message.Create(MessageSendMode.Reliable, ServerToClientMessageId.Cards);
-            message.AddCards(players[id].Hand);
+            message.AddCards(players[playerId].Hand);
 
             _networkManager.Server.Send(message, id);
         }

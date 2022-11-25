@@ -21,6 +21,7 @@ namespace UNO.Multiplayer
     public class NetworkManager : MonoBehaviour
     {
         public Server Server => server;
+        public Client Client => client;
         
         private Server server;
 

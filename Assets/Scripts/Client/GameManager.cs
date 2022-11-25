@@ -10,6 +10,8 @@ namespace UNO.Client
     {
         public static GameManager Instance { get; private set; }
 
+        private NetworkManager _networkManager;
+        
         [Header("Prefabs")]
         [SerializeField] private CardPrefabManager cardPrefabManagerBase;
         [Space]
@@ -21,6 +23,12 @@ namespace UNO.Client
         private void Awake()
         {
             Instance = this;
+            _networkManager = FindObjectOfType<NetworkManager>();
+        }
+
+        private void Start()
+        {
+            player = new UNOPlayer(_networkManager.Client.Id);
         }
 
         private void UpdateCards()
@@ -32,8 +40,7 @@ namespace UNO.Client
 
             for (int i = 0; i < player.Hand.Count; i++)
             {
-                CardPrefabManager card = Instantiate(cardPrefabManagerBase.GetComponent<CardPrefabManager>());
-                card.transform.parent = cardHolder.transform;
+                CardPrefabManager card = Instantiate(cardPrefabManagerBase.GetComponent<CardPrefabManager>(), cardHolder.transform);
 
                 switch (player.Hand[i].colour)
                 {
@@ -115,10 +122,13 @@ namespace UNO.Client
         [MessageHandler((ushort)ServerToClientMessageId.Cards)]
         private static void UpdatedHandMessage(Message message)
         {
-            List<Card> cards = message.GetCards();
+            if (Instance != null)
+            {
+                List<Card> cards = message.GetCards();
 
-            Instance.player.Hand = cards;
-            Instance.UpdateCards();
+                Instance.player.Hand = cards;
+                Instance.UpdateCards();
+            }
         }
     }
 }
