@@ -15,9 +15,13 @@ namespace UNO.Server
         // Use this for getting data about things like players and stuff
         private NetworkManager _networkManager;
 
-        private List<UNOPlayer> players = new List<UNOPlayer>();
+        public Dictionary<ushort, UNOPlayer> Players => players;
 
-        [SerializeField] private Deck deck = new Deck(true);
+        private Dictionary<ushort, UNOPlayer> players = new Dictionary<ushort, UNOPlayer>();
+
+        public Deck Deck => deck;
+        
+        [SerializeField] private Deck deck;
         
         [Header("Prefabs")]
         [SerializeField] private CardPrefabManager cardPrefabManagerBase;
@@ -30,6 +34,7 @@ namespace UNO.Server
 
         [SerializeField] private Card topCard;
         [SerializeField] private CardColour currentColour;
+        public TurnDirection turnDirection;
 
         private void Awake()
         {
@@ -38,13 +43,15 @@ namespace UNO.Server
         }
 
         private void Start()
-        {   
-            for (int i = 0; i < _networkManager.Server.ClientCount; i++)
+        {
+            deck.Shuffle();
+            
+            foreach (var player in _networkManager.Server.Clients)
             {
-                players.Add(new UNOPlayer(_networkManager.Server.Clients[i].Id));
+                players.Add(player.Id, new UNOPlayer(player.Id));
             }
 
-            for (int i = 0; i < players.Count; i++)
+            foreach (var player in players.Values)
             {
                 List<Card> randomCards = new List<Card>();
                 for (int j = 0; j < 5; j++)
@@ -52,26 +59,48 @@ namespace UNO.Server
                     randomCards.Add(deck.Draw());
                 }
                 
-                players[i].Hand = randomCards;
+                player.Hand = randomCards;
                 
-                if(players[i].networkClientId != 1)
+                if(player.networkClientId != 1)
                 {
-                    SendCardInformation(players[i].networkClientId, i);
+                    SendCardInformation(player.networkClientId);
                 }
             }
             
             UpdateCards();
         }
 
-        private void NewTurn(int index)
+        public void NewTurn(int index)
         {
-            turnIndex = (index + index) % _networkManager.Server.ClientCount;
-            if(turnIndex == 0)
+            turnIndex = (index + index) % _networkManager.Server.ClientCount-1;
+            if(turnIndex == 1)
             {
                 // Hosts turn
             }
             
-            // TODO: Send new turn message
+            SendGlobalTurnUpdate();
+        }
+
+        public int NextTurn()
+        {
+            return (turnIndex + 1) % _networkManager.Server.ClientCount;
+        }
+
+        private int ConvertClientIdIntoTurnIndex(ushort id)
+        {
+            int index = 0;
+            foreach (var player in players.Values)
+            {
+                if (player.networkClientId == id)
+                {
+                    return index;
+                }
+
+                index++;
+            }
+
+            Debug.Log("Could not find a player with the specified id");
+            return 0;
         }
 
         private void UpdateCards()
@@ -80,14 +109,16 @@ namespace UNO.Server
             {
                 Destroy(card.gameObject);
             }
-
-            for (int i = 0; i < players[0].Hand.Count; i++)
+            
+            for (int i = 0; i < players[1].Hand.Count; i++)
             {
                 CardPrefabManager card = Instantiate(cardPrefabManagerBase.GetComponent<CardPrefabManager>(), cardHolder.transform);
 
-                card.GetComponent<Button>().onClick.AddListener(delegate { PlayCard(0, i); });
+                int index = i;
+                
+                card.GetComponent<Button>().onClick.AddListener(delegate { PlayCard(1, index); });
 
-                switch (players[0].Hand[i].colour)
+                switch (players[1].Hand[i].colour)
                 {
                     case CardColour.NONE:
                         card.cardImage.color = Color.black;
@@ -106,7 +137,7 @@ namespace UNO.Server
                         break;
                 }
 
-                switch (players[0].Hand[i].type)
+                switch (players[1].Hand[i].type)
                 {
                     case CardType.ZERO:
                         card.numberText.text = "0";
@@ -152,7 +183,7 @@ namespace UNO.Server
                         break;
                 }
 
-                switch (players[0].Hand[i].secondaryType)
+                switch (players[1].Hand[i].secondaryType)
                 {
                     case CardType.DRAWFOUR:
                         card.numberText.text = "DRAW 4";
@@ -164,13 +195,19 @@ namespace UNO.Server
             }
         }
 
-        private void PlayCard(int playerId, int cardIndex)
+        private void PlayCard(ushort playerId, int cardIndex)
         {
+            if(ConvertClientIdIntoTurnIndex(playerId) != turnIndex) return;
+            
+            Debug.Log(players[playerId]);
+            Debug.Log("card index:" + cardIndex);
+            Debug.Log(players[playerId].Hand[cardIndex]);
+            
             Card card = players[playerId].Hand[cardIndex];
 
             bool sameColour = card.colour == currentColour;
             bool sameType = card.type == topCard.type;
-            bool isWild = card.secondaryType != CardType.NONE;
+            bool isWild = card.type != CardType.WILD;
             
             bool canPlayCard = sameColour || sameType || isWild;
 
@@ -180,7 +217,7 @@ namespace UNO.Server
                 
                 if (isWild)
                 {
-                    switch (card.type)
+                    switch (card.secondaryType)
                     {
                         case CardType.WILD:
                             CardLogic.Wild(this);
@@ -204,6 +241,9 @@ namespace UNO.Server
                         case CardType.DRAWTWO:
                             CardLogic.DrawTwo(this);
                             break;
+                        case CardType.REVERSE:
+                            CardLogic.Reverse(this);
+                            break;
                     }
                 }
 
@@ -212,35 +252,94 @@ namespace UNO.Server
                     NewTurn(1);
                 }
                 
-                // TODO: Set the top card to the new card and set the colour to the new colour
-                // TODO: If the card was not played by the host, send a message to them saying it was
-                // TODO: Send a message to everyone expect for the host and person that made played the card telling them about the move
-                // TODO: Send a message to everyone about the new turn
+                topCard = card;
+                currentColour = card.colour;
+                if (playerId != 1)
+                {
+                    ClientPlayed(playerId, (ushort)cardIndex);
+                }
+                else
+                {
+                    HostPlayed(card);
+                }
+                
+                SendCardPlayedMessage(playerId, card);
+                
+                SendGlobalCardUpdate();
             }
         }
 
-        private void SendCardInformation(ushort id, int playerId)
+        private void SendGlobalTurnUpdate()
+        {
+            Message message = Message.Create(MessageSendMode.Reliable, ServerToClientMessageId.NewTurn);
+            message.AddUShort((ushort)turnIndex);
+            
+            _networkManager.Server.SendToAll(message, 1);
+        }
+
+        private void SendGlobalCardUpdate()
+        {
+            foreach (var player in players.Values)
+            {
+                if (player.networkClientId != 1)
+                {
+                    SendCardInformation(player.networkClientId);
+                }
+            }
+        }
+
+        private void SendCardPlayedMessage(ushort clientThatPlayed, Card playedCard)
+        {
+            Message message = Message.Create(MessageSendMode.Reliable, ServerToClientMessageId.OtherPlayerPlayed);
+            message.AddUShort(clientThatPlayed);
+            message.AddCard(playedCard);
+            
+            foreach (var player in players.Values)
+            {
+                if (player.networkClientId != 1 && player.networkClientId != clientThatPlayed)
+                {
+                    _networkManager.Server.Send(message, player.networkClientId);
+                }
+            }
+        }
+
+        public void ShuffleAllHands()
+        {
+            
+        }
+
+        public void ChooseNewColour()
+        {
+            
+        }
+
+        private void ClientPlayed(ushort id, ushort index)
+        {
+            Message message = Message.Create(MessageSendMode.Reliable, ServerToClientMessageId.PlayerPlayed);
+            message.AddUShort(index);
+            
+            _networkManager.Client.Send(message);
+        }
+
+        private void HostPlayed(Card card)
+        {
+            
+        }
+
+        private void SendCardInformation(int playerId)
         {
             Message message = Message.Create(MessageSendMode.Reliable, ServerToClientMessageId.Cards);
-            message.AddCards(players[playerId].Hand);
+            message.AddCards(players[(ushort)playerId].Hand);
 
-            _networkManager.Server.Send(message, id);
-        }
-
-        private void Update()
-        {
-            if(turnIndex == 0)
-            {
-                // Hosts turn to play
-            }
+            _networkManager.Server.Send(message, players[(ushort)playerId].networkClientId);
         }
         
-        // TODO: Receive Move Messages
+        // TODO: Receive name Messages
 
         [MessageHandler((ushort)ClientToServerMessageId.Move)]
-        private static void PlayerMoved(Message message, ushort fromClientId)
+        private static void PlayerMoved(ushort fromClientId, Message message)
         {
-            //Instance.PlayCard();
+            Instance.PlayCard(fromClientId, message.GetUShort());
         }
     }
 }

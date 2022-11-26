@@ -18,10 +18,10 @@ namespace UNO.Server
 
         [SerializeField] private List<Card> cards = new List<Card>()
         {
-            new Card(CardColour.NONE, CardType.WILD),
-            new Card(CardColour.NONE, CardType.WILD),
-            new Card(CardColour.NONE, CardType.WILD),
-            new Card(CardColour.NONE, CardType.WILD),
+            new Card(CardColour.NONE, CardType.WILD, CardType.WILD),
+            new Card(CardColour.NONE, CardType.WILD, CardType.WILD),
+            new Card(CardColour.NONE, CardType.WILD, CardType.WILD),
+            new Card(CardColour.NONE, CardType.WILD, CardType.WILD),
             new Card(CardColour.NONE, CardType.WILD, CardType.DRAWFOUR),
             new Card(CardColour.NONE, CardType.WILD, CardType.DRAWFOUR),
             new Card(CardColour.NONE, CardType.WILD, CardType.DRAWFOUR),
@@ -135,6 +135,11 @@ namespace UNO.Server
                 cards[cards.Count - 1].secondaryType);
             cards.RemoveAt(cards.Count - 1);
             return returnCard;
+        }
+
+        public void Shuffle()
+        {
+            cards.Shuffle();
         }
     }
 

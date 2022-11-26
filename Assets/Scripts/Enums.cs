@@ -29,4 +29,10 @@
         DRAWFOUR,
         SHUFFLE
     }
+
+    public enum TurnDirection : ushort
+    {
+        FORWARD,
+        BACKWARD
+    }
 }

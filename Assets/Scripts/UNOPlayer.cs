@@ -14,5 +14,10 @@ namespace UNO.General
             Username = string.Empty;
             networkClientId = clientId;
         }
+
+        public void AddCard(Card card)
+        {
+            Hand.Add(card);
+        }
     }
 }

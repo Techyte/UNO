@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.18028328, g: 0.22571322, b: 0.30692163, a: 1}
+  m_IndirectSpecularColor: {r: 0.18028378, g: 0.22571412, b: 0.30692285, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -167,10 +167,345 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f11c4f7b07e266f4884d246cfeef89d0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  deck:
+    cards:
+    - colour: 3
+      type: 8
+      secondaryType: 0
+    - colour: 2
+      type: 13
+      secondaryType: 0
+    - colour: 4
+      type: 7
+      secondaryType: 0
+    - colour: 4
+      type: 5
+      secondaryType: 0
+    - colour: 2
+      type: 2
+      secondaryType: 0
+    - colour: 0
+      type: 14
+      secondaryType: 0
+    - colour: 3
+      type: 13
+      secondaryType: 0
+    - colour: 1
+      type: 11
+      secondaryType: 0
+    - colour: 2
+      type: 3
+      secondaryType: 0
+    - colour: 4
+      type: 6
+      secondaryType: 0
+    - colour: 1
+      type: 6
+      secondaryType: 0
+    - colour: 2
+      type: 8
+      secondaryType: 0
+    - colour: 3
+      type: 4
+      secondaryType: 0
+    - colour: 2
+      type: 4
+      secondaryType: 0
+    - colour: 1
+      type: 9
+      secondaryType: 0
+    - colour: 1
+      type: 2
+      secondaryType: 0
+    - colour: 4
+      type: 10
+      secondaryType: 0
+    - colour: 1
+      type: 13
+      secondaryType: 0
+    - colour: 0
+      type: 14
+      secondaryType: 16
+    - colour: 1
+      type: 10
+      secondaryType: 0
+    - colour: 3
+      type: 12
+      secondaryType: 0
+    - colour: 0
+      type: 14
+      secondaryType: 0
+    - colour: 2
+      type: 8
+      secondaryType: 0
+    - colour: 3
+      type: 4
+      secondaryType: 0
+    - colour: 3
+      type: 6
+      secondaryType: 0
+    - colour: 0
+      type: 14
+      secondaryType: 15
+    - colour: 4
+      type: 8
+      secondaryType: 0
+    - colour: 4
+      type: 11
+      secondaryType: 0
+    - colour: 2
+      type: 7
+      secondaryType: 0
+    - colour: 2
+      type: 5
+      secondaryType: 0
+    - colour: 1
+      type: 4
+      secondaryType: 0
+    - colour: 1
+      type: 8
+      secondaryType: 0
+    - colour: 1
+      type: 13
+      secondaryType: 0
+    - colour: 3
+      type: 11
+      secondaryType: 0
+    - colour: 1
+      type: 9
+      secondaryType: 0
+    - colour: 1
+      type: 4
+      secondaryType: 0
+    - colour: 1
+      type: 8
+      secondaryType: 0
+    - colour: 1
+      type: 12
+      secondaryType: 0
+    - colour: 3
+      type: 10
+      secondaryType: 0
+    - colour: 1
+      type: 7
+      secondaryType: 0
+    - colour: 3
+      type: 10
+      secondaryType: 0
+    - colour: 3
+      type: 3
+      secondaryType: 0
+    - colour: 2
+      type: 13
+      secondaryType: 0
+    - colour: 4
+      type: 8
+      secondaryType: 0
+    - colour: 3
+      type: 11
+      secondaryType: 0
+    - colour: 4
+      type: 9
+      secondaryType: 0
+    - colour: 4
+      type: 10
+      secondaryType: 0
+    - colour: 2
+      type: 6
+      secondaryType: 0
+    - colour: 3
+      type: 5
+      secondaryType: 0
+    - colour: 4
+      type: 12
+      secondaryType: 0
+    - colour: 1
+      type: 11
+      secondaryType: 0
+    - colour: 1
+      type: 5
+      secondaryType: 0
+    - colour: 1
+      type: 2
+      secondaryType: 0
+    - colour: 3
+      type: 7
+      secondaryType: 0
+    - colour: 3
+      type: 1
+      secondaryType: 0
+    - colour: 0
+      type: 14
+      secondaryType: 0
+    - colour: 1
+      type: 10
+      secondaryType: 0
+    - colour: 2
+      type: 12
+      secondaryType: 0
+    - colour: 2
+      type: 11
+      secondaryType: 0
+    - colour: 2
+      type: 3
+      secondaryType: 0
+    - colour: 0
+      type: 14
+      secondaryType: 0
+    - colour: 2
+      type: 6
+      secondaryType: 0
+    - colour: 2
+      type: 9
+      secondaryType: 0
+    - colour: 2
+      type: 12
+      secondaryType: 0
+    - colour: 4
+      type: 9
+      secondaryType: 0
+    - colour: 2
+      type: 4
+      secondaryType: 0
+    - colour: 2
+      type: 10
+      secondaryType: 0
+    - colour: 2
+      type: 7
+      secondaryType: 0
+    - colour: 3
+      type: 5
+      secondaryType: 0
+    - colour: 3
+      type: 7
+      secondaryType: 0
+    - colour: 1
+      type: 1
+      secondaryType: 0
+    - colour: 4
+      type: 7
+      secondaryType: 0
+    - colour: 1
+      type: 3
+      secondaryType: 0
+    - colour: 2
+      type: 9
+      secondaryType: 0
+    - colour: 4
+      type: 11
+      secondaryType: 0
+    - colour: 3
+      type: 13
+      secondaryType: 0
+    - colour: 0
+      type: 14
+      secondaryType: 15
+    - colour: 3
+      type: 9
+      secondaryType: 0
+    - colour: 3
+      type: 12
+      secondaryType: 0
+    - colour: 4
+      type: 2
+      secondaryType: 0
+    - colour: 1
+      type: 5
+      secondaryType: 0
+    - colour: 4
+      type: 3
+      secondaryType: 0
+    - colour: 2
+      type: 11
+      secondaryType: 0
+    - colour: 4
+      type: 2
+      secondaryType: 0
+    - colour: 4
+      type: 5
+      secondaryType: 0
+    - colour: 2
+      type: 10
+      secondaryType: 0
+    - colour: 1
+      type: 7
+      secondaryType: 0
+    - colour: 4
+      type: 12
+      secondaryType: 0
+    - colour: 4
+      type: 4
+      secondaryType: 0
+    - colour: 1
+      type: 12
+      secondaryType: 0
+    - colour: 0
+      type: 14
+      secondaryType: 15
+    - colour: 4
+      type: 6
+      secondaryType: 0
+    - colour: 4
+      type: 13
+      secondaryType: 0
+    - colour: 4
+      type: 1
+      secondaryType: 0
+    - colour: 1
+      type: 6
+      secondaryType: 0
+    - colour: 0
+      type: 14
+      secondaryType: 15
+    - colour: 4
+      type: 3
+      secondaryType: 0
+    - colour: 3
+      type: 6
+      secondaryType: 0
+    - colour: 2
+      type: 5
+      secondaryType: 0
+    - colour: 3
+      type: 9
+      secondaryType: 0
+    - colour: 3
+      type: 2
+      secondaryType: 0
+    - colour: 3
+      type: 2
+      secondaryType: 0
+    - colour: 2
+      type: 1
+      secondaryType: 0
+    - colour: 4
+      type: 4
+      secondaryType: 0
+    - colour: 1
+      type: 3
+      secondaryType: 0
+    - colour: 3
+      type: 3
+      secondaryType: 0
+    - colour: 4
+      type: 13
+      secondaryType: 0
+    - colour: 3
+      type: 8
+      secondaryType: 0
+    - colour: 2
+      type: 2
+      secondaryType: 0
   cardPrefabManagerBase: {fileID: 7402972068759497795, guid: 5f88bb769ad2ffb4092b2cb1192f6610,
     type: 3}
   cardHolder: {fileID: 1774361208}
   turnIndex: 0
+  topCard:
+    colour: 0
+    type: 0
+    secondaryType: 0
+  currentColour: 0
+  turnDirection: 0
 --- !u!1 &991183280
 GameObject:
   m_ObjectHideFlags: 0
@@ -471,74 +806,6 @@ MonoBehaviour:
   m_ShadowLayerMask: 1
   m_LightCookieSize: {x: 1, y: 1}
   m_LightCookieOffset: {x: 0, y: 0}
---- !u!1 &1484647055
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1484647058}
-  - component: {fileID: 1484647057}
-  - component: {fileID: 1484647056}
-  m_Layer: 0
-  m_Name: EventSystem
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &1484647056
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1484647055}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4f231c4fb786f3946a6b90b886c48677, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_SendPointerHoverToParent: 1
-  m_HorizontalAxis: Horizontal
-  m_VerticalAxis: Vertical
-  m_SubmitButton: Submit
-  m_CancelButton: Cancel
-  m_InputActionsPerSecond: 10
-  m_RepeatDelay: 0.5
-  m_ForceModuleActive: 0
---- !u!114 &1484647057
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1484647055}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 76c392e42b5098c458856cdf6ecaaaa1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_FirstSelected: {fileID: 0}
-  m_sendNavigationEvents: 1
-  m_DragThreshold: 10
---- !u!4 &1484647058
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1484647055}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_RootOrder: 4
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1774361208
 GameObject:
   m_ObjectHideFlags: 0
@@ -549,6 +816,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1774361209}
   - component: {fileID: 1774361210}
+  - component: {fileID: 1774361211}
   m_Layer: 5
   m_Name: CardHolder
   m_TagString: Untagged
@@ -574,7 +842,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: -144}
-  m_SizeDelta: {x: 100, y: 100}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1774361210
 MonoBehaviour:
@@ -602,3 +870,17 @@ MonoBehaviour:
   m_ChildScaleWidth: 0
   m_ChildScaleHeight: 0
   m_ReverseArrangement: 0
+--- !u!114 &1774361211
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1774361208}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3245ec927659c4140ac4f8d17403cc18, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_HorizontalFit: 1
+  m_VerticalFit: 1

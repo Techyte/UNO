@@ -12,12 +12,11 @@ namespace UNO.Client
         public static GameManager Instance { get; private set; }
 
         private NetworkManager _networkManager;
-        
-        [Header("Prefabs")]
-        [SerializeField] private CardPrefabManager cardPrefabManagerBase;
-        [Space]
-        [Header("Assignments")]
-        [SerializeField] private GameObject cardHolder;
+
+        [Header("Prefabs")] [SerializeField] private CardPrefabManager cardPrefabManagerBase;
+
+        [Space] [Header("Assignments")] [SerializeField]
+        private GameObject cardHolder;
 
         private UNOPlayer player;
 
@@ -41,9 +40,12 @@ namespace UNO.Client
 
             for (int i = 0; i < player.Hand.Count; i++)
             {
-                CardPrefabManager card = Instantiate(cardPrefabManagerBase.GetComponent<CardPrefabManager>(), cardHolder.transform);
+                CardPrefabManager card = Instantiate(cardPrefabManagerBase.GetComponent<CardPrefabManager>(),
+                    cardHolder.transform);
 
-                card.GetComponent<Button>().onClick.AddListener(delegate { PlayCard(i); });
+                int index = i;
+                
+                card.GetComponent<Button>().onClick.AddListener(delegate { PlayCard(index); });
 
                 switch (player.Hand[i].colour)
                 {
@@ -122,12 +124,27 @@ namespace UNO.Client
             }
         }
 
+        private void OtherPlayerPlayed(int otherPlayerId)
+        {
+            Debug.Log("Someone else played: " + otherPlayerId);
+        }
+
+        private void LocalPlayed(ushort cardIndex)
+        {
+            Debug.Log("Played: " + cardIndex);
+        }
+
         private void PlayCard(int cardIndex)
         {
             Message message = Message.Create(MessageSendMode.Reliable, ClientToServerMessageId.Move);
             message.AddUShort((ushort)cardIndex);
-            
+
             _networkManager.Client.Send(message);
+        }
+
+        private void NewTurn(int newTurnIndex)
+        {
+            Debug.Log("New Turn: " + newTurnIndex);
         }
 
         [MessageHandler((ushort)ServerToClientMessageId.Cards)]
@@ -141,7 +158,25 @@ namespace UNO.Client
                 Instance.UpdateCards();
             }
         }
-        
+
+        [MessageHandler((ushort)ServerToClientMessageId.PlayerPlayed)]
+        private static void LocalPlayerPlayed(Message message)
+        {
+            Instance.LocalPlayed(message.GetUShort());
+        }
+
+        [MessageHandler((ushort)ServerToClientMessageId.OtherPlayerPlayed)]
+        private static void OtherPlayerPlayedMessage(Message message)
+        {
+            Instance.OtherPlayerPlayed(message.GetUShort());
+        }
+
+        [MessageHandler((ushort)ServerToClientMessageId.NewTurn)]
+        private static void NewTurnMessage(Message message)
+        {
+            Instance.NewTurn(message.GetUShort());
+        }
+
         // TODO: Receive a bunch of messages from the server about cards and turns
     }
 }

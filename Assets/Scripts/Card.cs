@@ -10,6 +10,14 @@ namespace UNO.General
         {
             this.colour = colour;
             this.type = type;
+            secondaryType = CardType.NONE;
+        }
+
+        public Card()
+        {
+            colour = CardColour.NONE;
+            type = CardType.ONE;
+            secondaryType = CardType.NONE;
         }
         
         public Card(CardColour colour, CardType type, CardType secondaryType)
