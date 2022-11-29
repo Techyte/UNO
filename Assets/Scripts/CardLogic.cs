@@ -71,6 +71,8 @@ namespace UNO.General
         public static void DrawTwo(ServerGameManager manager)
         {
             int nextTurn = manager.NextTurn();
+            
+            Debug.Log("Next turn: " + nextTurn);
 
             UNOPlayer playerToDraw2 = manager.Players[(ushort)nextTurn];
             playerToDraw2.AddCard(manager.Deck.Draw());
@@ -80,6 +82,8 @@ namespace UNO.General
         public static void DrawFour(ServerGameManager manager)
         {
             int nextTurn = manager.NextTurn();
+            
+            Debug.Log("Next turn: " + nextTurn);
 
             UNOPlayer playerToDraw2 = manager.Players[(ushort)nextTurn];
             playerToDraw2.AddCard(manager.Deck.Draw());

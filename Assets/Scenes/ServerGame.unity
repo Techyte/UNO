@@ -501,10 +501,10 @@ MonoBehaviour:
   cardHolder: {fileID: 1774361208}
   turnIndex: 0
   topCard:
-    colour: 0
-    type: 0
+    colour: 1
+    type: 2
     secondaryType: 0
-  currentColour: 0
+  currentColour: 1
   turnDirection: 0
 --- !u!1 &991183280
 GameObject:

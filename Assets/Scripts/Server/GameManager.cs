@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UNO.General;
 using UNO.Multiplayer;
@@ -72,7 +73,24 @@ namespace UNO.Server
 
         public void NewTurn(int index)
         {
-            turnIndex = (index + index) % _networkManager.Server.ClientCount-1;
+            if (turnDirection == TurnDirection.FORWARD)
+            {
+                turnIndex += index;
+                if (turnIndex >= _networkManager.Server.ClientCount)
+                {
+                    Debug.Log("Turn went around");
+                    turnIndex = 0;
+                }
+            }
+            else
+            {
+                turnIndex -= index;
+                if (turnIndex > 0)
+                {
+                    turnIndex = _networkManager.Server.ClientCount;
+                }
+            }
+            
             if(turnIndex == 1)
             {
                 // Hosts turn
@@ -83,7 +101,26 @@ namespace UNO.Server
 
         public int NextTurn()
         {
-            return (turnIndex + 1) % _networkManager.Server.ClientCount;
+            int nextTurnIndex = turnIndex;
+            
+            if (turnDirection == TurnDirection.FORWARD)
+            {
+                nextTurnIndex += 1;
+                if (nextTurnIndex >= _networkManager.Server.ClientCount)
+                {
+                    nextTurnIndex = 0;
+                } 
+            }
+            else
+            {
+                nextTurnIndex -= 1;
+                if (nextTurnIndex > 0)
+                {
+                    nextTurnIndex = _networkManager.Server.ClientCount;
+                }
+            }
+            
+            return nextTurnIndex;
         }
 
         private int ConvertClientIdIntoTurnIndex(ushort id)
@@ -199,21 +236,20 @@ namespace UNO.Server
         {
             if(ConvertClientIdIntoTurnIndex(playerId) != turnIndex) return;
             
-            Debug.Log(players[playerId]);
-            Debug.Log("card index:" + cardIndex);
-            Debug.Log(players[playerId].Hand[cardIndex]);
-            
             Card card = players[playerId].Hand[cardIndex];
 
             bool sameColour = card.colour == currentColour;
             bool sameType = card.type == topCard.type;
-            bool isWild = card.type != CardType.WILD;
+            bool isWild = card.type == CardType.WILD;
             
             bool canPlayCard = sameColour || sameType || isWild;
 
             if (canPlayCard)
             {
                 bool skipped = false;
+                
+                Debug.Log(card.type);
+                Debug.Log(card.secondaryType);
                 
                 if (isWild)
                 {
@@ -232,16 +268,20 @@ namespace UNO.Server
                 }
                 else
                 {
+                    Debug.Log("Looking for a non wild card");
                     switch (card.type)
                     {
                         case CardType.SKIP:
+                            Debug.Log("its a skip");
                             skipped = true;
                             CardLogic.Skip(this);
                             break;
                         case CardType.DRAWTWO:
+                            Debug.Log("its a draw 2");
                             CardLogic.DrawTwo(this);
                             break;
                         case CardType.REVERSE:
+                            Debug.Log("its a reverse");
                             CardLogic.Reverse(this);
                             break;
                     }
@@ -249,8 +289,12 @@ namespace UNO.Server
 
                 if (!skipped)
                 {
+                    Debug.Log("Increasing turn counter");
                     NewTurn(1);
+                    Debug.Log(turnIndex);
                 }
+
+                players[playerId].Hand.Remove(card);
                 
                 topCard = card;
                 currentColour = card.colour;
@@ -305,25 +349,50 @@ namespace UNO.Server
 
         public void ShuffleAllHands()
         {
+            List<UNOPlayer> playersToShuffle = players.Values.ToList();
+            List<Card[]> hands = new List<Card[]>();
+
+            foreach (var player in playersToShuffle)
+            {
+                hands.Add(player.Hand.ToArray());
+            }
             
+            hands.Shuffle();
+
+            for (int i = 0; i < hands.Count; i++)
+            {
+                playersToShuffle[i].Hand = hands[i].ToList();
+            }
+
+            // TODO: DONE Shuffle hands logic
         }
 
         public void ChooseNewColour()
         {
+            Debug.Log("Gonna choose a new colour");
             
+            // TODO: Choose new colour logic and messages related
         }
 
         private void ClientPlayed(ushort id, ushort index)
         {
+            Debug.Log("A client played");
+            
+            // TODO: Play animations for client playing
+            
             Message message = Message.Create(MessageSendMode.Reliable, ServerToClientMessageId.PlayerPlayed);
             message.AddUShort(index);
             
-            _networkManager.Client.Send(message);
+            _networkManager.Server.Send(message, id);
         }
 
         private void HostPlayed(Card card)
         {
+            Debug.Log("You Played");
             
+            UpdateCards();
+            
+            // TODO: Play animations for host playing
         }
 
         private void SendCardInformation(int playerId)

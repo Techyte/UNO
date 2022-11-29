@@ -30,6 +30,8 @@ namespace UNO.Client
         {
             player = new UNOPlayer(_networkManager.Client.Id);
         }
+        
+        // TODO: Send the name message
 
         private void UpdateCards()
         {
@@ -126,11 +128,15 @@ namespace UNO.Client
 
         private void OtherPlayerPlayed(int otherPlayerId)
         {
+            // TODO: Link proper other player animation/feedback
+            
             Debug.Log("Someone else played: " + otherPlayerId);
         }
 
         private void LocalPlayed(ushort cardIndex)
         {
+            // TODO: Link proper local played animations/feedback
+            
             Debug.Log("Played: " + cardIndex);
         }
 
@@ -144,14 +150,19 @@ namespace UNO.Client
 
         private void NewTurn(int newTurnIndex)
         {
+            // TODO: Tell the player if they can play or not when the turn upadates
+            
             Debug.Log("New Turn: " + newTurnIndex);
         }
 
         [MessageHandler((ushort)ServerToClientMessageId.Cards)]
         private static void UpdatedHandMessage(Message message)
         {
+            Debug.Log("Received card message");
+            
             if (Instance != null)
             {
+                Debug.Log("Received card message and actually doing something with it");
                 List<Card> cards = message.GetCards();
 
                 Instance.player.Hand = cards;
@@ -176,7 +187,5 @@ namespace UNO.Client
         {
             Instance.NewTurn(message.GetUShort());
         }
-
-        // TODO: Receive a bunch of messages from the server about cards and turns
     }
 }
