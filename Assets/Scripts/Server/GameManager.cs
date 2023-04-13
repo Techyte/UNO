@@ -29,6 +29,8 @@ namespace UNO.Server
         [Space]
         [Header("Assignments")]
         [SerializeField] private GameObject cardHolder;
+
+        [SerializeField] private CardPrefabManager currentCardDisplay;
         [Space]
         [Header("Readouts")]
         [SerializeField] private int turnIndex = 0;
@@ -230,6 +232,86 @@ namespace UNO.Server
                         break;
                 }
             }
+            
+            UpdateCurrentCardDisplay();
+        }
+
+        private void UpdateCurrentCardDisplay()
+        {
+            switch (currentColour)
+            {
+                case CardColour.NONE:
+                    currentCardDisplay.cardImage.color = Color.black;
+                    break;
+                case CardColour.RED:
+                    currentCardDisplay.cardImage.color = Color.red;
+                    break;
+                case CardColour.GREEN:
+                    currentCardDisplay.cardImage.color = Color.green;
+                    break;
+                case CardColour.BLUE:
+                    currentCardDisplay.cardImage.color = Color.blue;
+                    break;
+                case CardColour.YELLOW:
+                    currentCardDisplay.cardImage.color = Color.yellow;
+                    break;
+            }
+            
+            switch (topCard.type)
+            {
+                case CardType.ZERO:
+                    currentCardDisplay.numberText.text = "0";
+                    break;
+                case CardType.ONE:
+                    currentCardDisplay.numberText.text = "1";
+                    break;
+                case CardType.TWO:
+                    currentCardDisplay.numberText.text = "2";
+                    break;
+                case CardType.THREE:
+                    currentCardDisplay.numberText.text = "3";
+                    break;
+                case CardType.FOUR:
+                    currentCardDisplay.numberText.text = "4";
+                    break;
+                case CardType.FIVE:
+                    currentCardDisplay.numberText.text = "5";
+                    break;
+                case CardType.SIX:
+                    currentCardDisplay.numberText.text = "6";
+                    break;
+                case CardType.SEVEN:
+                    currentCardDisplay.numberText.text = "7";
+                    break;
+                case CardType.EIGHT:
+                    currentCardDisplay.numberText.text = "8";
+                    break;
+                case CardType.NINE:
+                    currentCardDisplay.numberText.text = "9";
+                    break;
+                case CardType.SKIP:
+                    currentCardDisplay.numberText.text = "SKIP";
+                    break;
+                case CardType.REVERSE:
+                    currentCardDisplay.numberText.text = "REVERSE";
+                    break;
+                case CardType.WILD:
+                    currentCardDisplay.numberText.text = "WILD";
+                    break;
+                case CardType.DRAWTWO:
+                    currentCardDisplay.numberText.text = "DRAW 2";
+                    break;
+            }
+
+            switch (topCard.secondaryType)
+            {
+                case CardType.DRAWFOUR:
+                    currentCardDisplay.numberText.text = "DRAW 4";
+                    break;
+                case CardType.SHUFFLE:
+                    currentCardDisplay.numberText.text = "SHUFFLE";
+                    break;
+            }
         }
 
         private void PlayCard(ushort playerId, int cardIndex)
@@ -290,7 +372,7 @@ namespace UNO.Server
                 if (!skipped)
                 {
                     Debug.Log("Increasing turn counter");
-                    NewTurn(1);
+                    NewTurn(NextTurn());
                     Debug.Log(turnIndex);
                 }
 
@@ -311,6 +393,25 @@ namespace UNO.Server
                 
                 SendGlobalCardUpdate();
             }
+        }
+
+        private void Draw(ushort playerId)
+        {
+            if(ConvertClientIdIntoTurnIndex(playerId) != turnIndex) return;
+            
+            if (players.TryGetValue(playerId, out UNOPlayer player))
+            {
+                player.AddCard(deck.Draw());
+            }
+            
+            NewTurn(NextTurn());
+            
+            SendGlobalCardUpdate();
+        }
+
+        public void ServerDrawButton(int playerId)
+        {
+            Draw((ushort)playerId);
         }
 
         private void SendGlobalTurnUpdate()
@@ -380,6 +481,8 @@ namespace UNO.Server
             
             // TODO: Play animations for client playing
             
+            UpdateCurrentCardDisplay();
+            
             Message message = Message.Create(MessageSendMode.Reliable, ServerToClientMessageId.PlayerPlayed);
             message.AddUShort(index);
             
@@ -399,6 +502,8 @@ namespace UNO.Server
         {
             Message message = Message.Create(MessageSendMode.Reliable, ServerToClientMessageId.Cards);
             message.AddCards(players[(ushort)playerId].Hand);
+            message.AddCard(topCard);
+            message.AddUShort((ushort)currentColour);
 
             _networkManager.Server.Send(message, players[(ushort)playerId].networkClientId);
         }
@@ -409,6 +514,12 @@ namespace UNO.Server
         private static void PlayerMoved(ushort fromClientId, Message message)
         {
             Instance.PlayCard(fromClientId, message.GetUShort());
+        }
+
+        [MessageHandler((ushort)ClientToServerMessageId.Draw)]
+        private static void Draw(ushort fromClientId, Message message)
+        {
+            Instance.Draw(fromClientId);
         }
     }
 }

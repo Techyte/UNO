@@ -70,7 +70,7 @@ namespace UNO.General
 
         public static void DrawTwo(ServerGameManager manager)
         {
-            int nextTurn = manager.NextTurn();
+            int nextTurn = manager.NextTurn()+1;
             
             Debug.Log("Next turn: " + nextTurn);
 

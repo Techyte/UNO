@@ -20,7 +20,8 @@ namespace UNO.Multiplayer
     public enum ClientToServerMessageId : ushort
     {
         Name = 100,
-        Move
+        Move,
+        Draw
     }
 
     public class NetworkManager : MonoBehaviour

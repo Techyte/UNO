@@ -2,6 +2,7 @@ using Riptide;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UNO.Enums;
 using UNO.General;
 using UNO.Multiplayer;
 
@@ -18,7 +19,12 @@ namespace UNO.Client
         [Space] [Header("Assignments")] [SerializeField]
         private GameObject cardHolder;
 
+        [SerializeField] private CardPrefabManager currentCardDisplay;
+
         private UNOPlayer player;
+
+        private Card topCard;
+        private CardColour currentColour;
 
         private void Awake()
         {
@@ -124,6 +130,81 @@ namespace UNO.Client
                         break;
                 }
             }
+            
+            switch (currentColour)
+            {
+                case CardColour.NONE:
+                    currentCardDisplay.cardImage.color = Color.black;
+                    break;
+                case CardColour.RED:
+                    currentCardDisplay.cardImage.color = Color.red;
+                    break;
+                case CardColour.GREEN:
+                    currentCardDisplay.cardImage.color = Color.green;
+                    break;
+                case CardColour.BLUE:
+                    currentCardDisplay.cardImage.color = Color.blue;
+                    break;
+                case CardColour.YELLOW:
+                    currentCardDisplay.cardImage.color = Color.yellow;
+                    break;
+            }
+            
+            switch (topCard.type)
+            {
+                case CardType.ZERO:
+                    currentCardDisplay.numberText.text = "0";
+                    break;
+                case CardType.ONE:
+                    currentCardDisplay.numberText.text = "1";
+                    break;
+                case CardType.TWO:
+                    currentCardDisplay.numberText.text = "2";
+                    break;
+                case CardType.THREE:
+                    currentCardDisplay.numberText.text = "3";
+                    break;
+                case CardType.FOUR:
+                    currentCardDisplay.numberText.text = "4";
+                    break;
+                case CardType.FIVE:
+                    currentCardDisplay.numberText.text = "5";
+                    break;
+                case CardType.SIX:
+                    currentCardDisplay.numberText.text = "6";
+                    break;
+                case CardType.SEVEN:
+                    currentCardDisplay.numberText.text = "7";
+                    break;
+                case CardType.EIGHT:
+                    currentCardDisplay.numberText.text = "8";
+                    break;
+                case CardType.NINE:
+                    currentCardDisplay.numberText.text = "9";
+                    break;
+                case CardType.SKIP:
+                    currentCardDisplay.numberText.text = "SKIP";
+                    break;
+                case CardType.REVERSE:
+                    currentCardDisplay.numberText.text = "REVERSE";
+                    break;
+                case CardType.WILD:
+                    currentCardDisplay.numberText.text = "WILD";
+                    break;
+                case CardType.DRAWTWO:
+                    currentCardDisplay.numberText.text = "DRAW 2";
+                    break;
+            }
+
+            switch (topCard.secondaryType)
+            {
+                case CardType.DRAWFOUR:
+                    currentCardDisplay.numberText.text = "DRAW 4";
+                    break;
+                case CardType.SHUFFLE:
+                    currentCardDisplay.numberText.text = "SHUFFLE";
+                    break;
+            }
         }
 
         private void OtherPlayerPlayed(int otherPlayerId)
@@ -148,6 +229,12 @@ namespace UNO.Client
             _networkManager.Client.Send(message);
         }
 
+        public void DrawCard()
+        {
+            Message message = Message.Create(MessageSendMode.Reliable, ClientToServerMessageId.Draw);
+            _networkManager.Client.Send(message);
+        }
+
         private void NewTurn(int newTurnIndex)
         {
             // TODO: Tell the player if they can play or not when the turn upadates
@@ -164,8 +251,12 @@ namespace UNO.Client
             {
                 Debug.Log("Received card message and actually doing something with it");
                 List<Card> cards = message.GetCards();
+                Card topCard = message.GetCard();
+                CardColour currentColour = (CardColour)message.GetUShort();
 
                 Instance.player.Hand = cards;
+                Instance.topCard = topCard;
+                Instance.currentColour = currentColour;
                 Instance.UpdateCards();
             }
         }
