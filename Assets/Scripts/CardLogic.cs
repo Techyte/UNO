@@ -70,18 +70,19 @@ namespace UNO.General
 
         public static void DrawTwo(ServerGameManager manager)
         {
-            int nextTurn = manager.NextTurn()+1;
+            int nextTurn = manager.NextTurn(manager.turnIndex);
             
             Debug.Log("Next turn: " + nextTurn);
 
-            UNOPlayer playerToDraw2 = manager.Players[(ushort)nextTurn];
+            // plus one because 0 is not a client id and turn indexs start from 1
+            UNOPlayer playerToDraw2 = manager.Players[(ushort)(nextTurn+1)];
             playerToDraw2.AddCard(manager.Deck.Draw());
             playerToDraw2.AddCard(manager.Deck.Draw());
         }
 
         public static void DrawFour(ServerGameManager manager)
         {
-            int nextTurn = manager.NextTurn();
+            int nextTurn = manager.NextTurn(manager.turnIndex);
             
             Debug.Log("Next turn: " + nextTurn);
 

@@ -18,6 +18,7 @@ namespace UNO.Client
 
         [Space] [Header("Assignments")] [SerializeField]
         private GameObject cardHolder;
+        [SerializeField] private GameObject colourPickDisplay;
 
         [SerializeField] private CardPrefabManager currentCardDisplay;
 
@@ -232,6 +233,21 @@ namespace UNO.Client
         public void DrawCard()
         {
             Message message = Message.Create(MessageSendMode.Reliable, ClientToServerMessageId.Draw);
+            _networkManager.Client.Send(message);
+        }
+
+        public void ChooseNewColour()
+        {
+            Debug.Log("Gonna choose a new colour");
+
+            colourPickDisplay.SetActive(true);
+        }
+
+        public void NewColourChosen(int colourId)
+        {
+            colourPickDisplay.SetActive(false);
+            Message message = Message.Create(MessageSendMode.Reliable, ClientToServerMessageId.ColourSelectResult);
+            message.AddUShort((ushort)colourId);
             _networkManager.Client.Send(message);
         }
 

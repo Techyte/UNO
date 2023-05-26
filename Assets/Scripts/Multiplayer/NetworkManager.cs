@@ -1,5 +1,6 @@
 using TMPro;
 using UnityEngine.SceneManagement;
+using UNO.Client;
 
 namespace UNO.Multiplayer
 {
@@ -15,13 +16,15 @@ namespace UNO.Multiplayer
         PlayerPlayed,
         OtherPlayerPlayed,
         WildSelect,
+        CanSelectColour,
     }
 
     public enum ClientToServerMessageId : ushort
     {
         Name = 100,
         Move,
-        Draw
+        Draw,
+        ColourSelectResult,
     }
 
     public class NetworkManager : MonoBehaviour
@@ -116,6 +119,12 @@ namespace UNO.Multiplayer
         private static void StartGameMessage(Message message)
         {
             SceneManager.LoadScene(2);
+        }
+
+        [MessageHandler((ushort)ServerToClientMessageId.CanSelectColour)]
+        private static void CanSelectColour(Message message)
+        {
+            GameManager.Instance.ChooseNewColour();
         }
     }
    

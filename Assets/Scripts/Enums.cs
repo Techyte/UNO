@@ -4,9 +4,9 @@
     {
         NONE,
         RED,
-        YELLOW,
         GREEN,
-        BLUE
+        BLUE,
+        YELLOW
     }
         
     public enum CardType : ushort

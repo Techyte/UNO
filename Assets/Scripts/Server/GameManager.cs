@@ -29,11 +29,12 @@ namespace UNO.Server
         [Space]
         [Header("Assignments")]
         [SerializeField] private GameObject cardHolder;
+        [SerializeField] private GameObject colourPickDisplay;
 
         [SerializeField] private CardPrefabManager currentCardDisplay;
         [Space]
         [Header("Readouts")]
-        [SerializeField] private int turnIndex = 0;
+        public int turnIndex = 0;
 
         [SerializeField] private Card topCard;
         [SerializeField] private CardColour currentColour;
@@ -75,41 +76,21 @@ namespace UNO.Server
 
         public void NewTurn(int index)
         {
-            if (turnDirection == TurnDirection.FORWARD)
-            {
-                turnIndex += index;
-                if (turnIndex >= _networkManager.Server.ClientCount)
-                {
-                    Debug.Log("Turn went around");
-                    turnIndex = 0;
-                }
-            }
-            else
-            {
-                turnIndex -= index;
-                if (turnIndex > 0)
-                {
-                    turnIndex = _networkManager.Server.ClientCount;
-                }
-            }
-            
-            if(turnIndex == 1)
-            {
-                // Hosts turn
-            }
+            turnIndex = index;
             
             SendGlobalTurnUpdate();
         }
 
-        public int NextTurn()
+        public int NextTurn(int currentTurnIndex)
         {
-            int nextTurnIndex = turnIndex;
+            int nextTurnIndex = currentTurnIndex;
             
             if (turnDirection == TurnDirection.FORWARD)
             {
                 nextTurnIndex += 1;
                 if (nextTurnIndex >= _networkManager.Server.ClientCount)
                 {
+                    Debug.Log("hosts turn afetr turn change");
                     nextTurnIndex = 0;
                 } 
             }
@@ -140,6 +121,12 @@ namespace UNO.Server
 
             Debug.Log("Could not find a player with the specified id");
             return 0;
+        }
+
+        private ushort ConvertTurnIndexToClientId(int index)
+        {
+            // plus one because 0 is not a client id and turn indexs start from 1
+            return players[(ushort)(index+1)].networkClientId;
         }
 
         private void UpdateCards()
@@ -372,7 +359,7 @@ namespace UNO.Server
                 if (!skipped)
                 {
                     Debug.Log("Increasing turn counter");
-                    NewTurn(NextTurn());
+                    NewTurn(NextTurn(turnIndex));
                     Debug.Log(turnIndex);
                 }
 
@@ -404,7 +391,7 @@ namespace UNO.Server
                 player.AddCard(deck.Draw());
             }
             
-            NewTurn(NextTurn());
+            NewTurn(NextTurn(turnIndex));
             
             SendGlobalCardUpdate();
         }
@@ -471,8 +458,35 @@ namespace UNO.Server
         public void ChooseNewColour()
         {
             Debug.Log("Gonna choose a new colour");
-            
-            // TODO: Choose new colour logic and messages related
+
+            ushort clientPlayedId = ConvertTurnIndexToClientId(turnIndex);
+
+            // if host played
+            if (clientPlayedId == 0)
+            {
+                colourPickDisplay.SetActive(true);
+            }
+            else
+            {
+                Message message = Message.Create(MessageSendMode.Reliable, ServerToClientMessageId.CanSelectColour);
+                _networkManager.Server.Send(message, clientPlayedId);
+            }
+        }
+
+        public void NewColourChosen(int colourId)
+        {
+            currentColour = (CardColour)colourId;
+            colourPickDisplay.SetActive(false);
+            NextTurn(turnIndex);
+        }
+
+        private void ClientMadeColourSelection(ushort clientThatChose, int selectedColour)
+        {
+            if (ConvertClientIdIntoTurnIndex(clientThatChose) == turnIndex)
+            {
+                currentColour = (CardColour)selectedColour;
+                NextTurn(turnIndex);
+            }
         }
 
         private void ClientPlayed(ushort id, ushort index)
@@ -520,6 +534,12 @@ namespace UNO.Server
         private static void Draw(ushort fromClientId, Message message)
         {
             Instance.Draw(fromClientId);
+        }
+
+        [MessageHandler((ushort)ClientToServerMessageId.ColourSelectResult)]
+        private static void ColourSelectionResult(ushort fromClientId, Message message)
+        {
+            Instance.ClientMadeColourSelection(fromClientId, message.GetUShort());
         }
     }
 }
