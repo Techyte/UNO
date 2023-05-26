@@ -347,6 +347,7 @@ namespace UNO.Server
                             break;
                         case CardType.DRAWTWO:
                             Debug.Log("its a draw 2");
+                            skipped = true;
                             CardLogic.DrawTwo(this);
                             break;
                         case CardType.REVERSE:
@@ -356,7 +357,7 @@ namespace UNO.Server
                     }
                 }
 
-                if (!skipped)
+                if (!skipped && !isWild)
                 {
                     Debug.Log("Increasing turn counter");
                     NewTurn(NextTurn(turnIndex));
@@ -379,12 +380,14 @@ namespace UNO.Server
                 SendCardPlayedMessage(playerId, card);
                 
                 SendGlobalCardUpdate();
+                UpdateCards();
             }
         }
 
         private void Draw(ushort playerId)
         {
             if(ConvertClientIdIntoTurnIndex(playerId) != turnIndex) return;
+            Debug.Log("drawing a card and we have checked and they can");
             
             if (players.TryGetValue(playerId, out UNOPlayer player))
             {
@@ -394,6 +397,7 @@ namespace UNO.Server
             NewTurn(NextTurn(turnIndex));
             
             SendGlobalCardUpdate();
+            UpdateCards();
         }
 
         public void ServerDrawButton(int playerId)
@@ -462,7 +466,7 @@ namespace UNO.Server
             ushort clientPlayedId = ConvertTurnIndexToClientId(turnIndex);
 
             // if host played
-            if (clientPlayedId == 0)
+            if (clientPlayedId == 1)
             {
                 colourPickDisplay.SetActive(true);
             }
@@ -477,15 +481,18 @@ namespace UNO.Server
         {
             currentColour = (CardColour)colourId;
             colourPickDisplay.SetActive(false);
-            NextTurn(turnIndex);
+            
+            NewTurn(NextTurn(turnIndex));
         }
 
         private void ClientMadeColourSelection(ushort clientThatChose, int selectedColour)
         {
             if (ConvertClientIdIntoTurnIndex(clientThatChose) == turnIndex)
             {
+                Debug.Log("Client chose a colour");
                 currentColour = (CardColour)selectedColour;
-                NextTurn(turnIndex);
+            
+                NewTurn(NextTurn(turnIndex));
             }
         }
 

@@ -65,7 +65,7 @@ namespace UNO.General
 
         public static void Skip(ServerGameManager manager)
         {
-            manager.NewTurn(2);
+            manager.NewTurn(manager.NextTurn(manager.NextTurn(manager.turnIndex)));
         }
 
         public static void DrawTwo(ServerGameManager manager)
@@ -73,6 +73,8 @@ namespace UNO.General
             int nextTurn = manager.NextTurn(manager.turnIndex);
             
             Debug.Log("Next turn: " + nextTurn);
+            
+            manager.NewTurn(manager.NextTurn(manager.NextTurn(manager.turnIndex)));
 
             // plus one because 0 is not a client id and turn indexs start from 1
             UNOPlayer playerToDraw2 = manager.Players[(ushort)(nextTurn+1)];
@@ -86,11 +88,13 @@ namespace UNO.General
             
             Debug.Log("Next turn: " + nextTurn);
 
-            UNOPlayer playerToDraw2 = manager.Players[(ushort)nextTurn];
-            playerToDraw2.AddCard(manager.Deck.Draw());
-            playerToDraw2.AddCard(manager.Deck.Draw());
-            playerToDraw2.AddCard(manager.Deck.Draw());
-            playerToDraw2.AddCard(manager.Deck.Draw());
+
+            // plus one because 0 is not a client id and turn indexs start from 1
+            UNOPlayer playerToDraw4 = manager.Players[(ushort)(nextTurn+1)];
+            playerToDraw4.AddCard(manager.Deck.Draw());
+            playerToDraw4.AddCard(manager.Deck.Draw());
+            playerToDraw4.AddCard(manager.Deck.Draw());
+            playerToDraw4.AddCard(manager.Deck.Draw());
             
             manager.ChooseNewColour();
         }
