@@ -97,9 +97,9 @@ namespace UNO.Server
             else
             {
                 nextTurnIndex -= 1;
-                if (nextTurnIndex > 0)
+                if (nextTurnIndex < 0)
                 {
-                    nextTurnIndex = _networkManager.Server.ClientCount;
+                    nextTurnIndex = _networkManager.Server.ClientCount-1;
                 }
             }
             
@@ -451,9 +451,9 @@ namespace UNO.Server
             
             hands.Shuffle();
 
-            for (int i = 0; i < hands.Count; i++)
+            foreach (var hand in hands)
             {
-                playersToShuffle[i].Hand = hands[i].ToList();
+                hand.Shuffle();
             }
 
             // TODO: DONE Shuffle hands logic
