@@ -22,7 +22,7 @@ namespace UNO.Server
 
         public Deck Deck => deck;
         
-        [SerializeField] private Deck deck;
+        private Deck deck;
         
         [Header("Prefabs")]
         [SerializeField] private CardPrefabManager cardPrefabManagerBase;
@@ -44,6 +44,17 @@ namespace UNO.Server
         {
             Instance = this;
             _networkManager = FindObjectOfType<NetworkManager>();
+            deck = new Deck();
+        }
+
+        public CardColour GetCurrentColour()
+        {
+            return currentColour;
+        }
+
+        public Card GetTopCard()
+        {
+            return topCard;
         }
 
         private void Start()
@@ -52,7 +63,9 @@ namespace UNO.Server
             
             foreach (var player in _networkManager.Server.Clients)
             {
-                players.Add(player.Id, new UNOPlayer(player.Id));
+                UNOPlayer unoPlayer = new UNOPlayer(player.Id);
+                
+                players.Add(player.Id, unoPlayer);
             }
 
             foreach (var player in players.Values)
@@ -90,7 +103,6 @@ namespace UNO.Server
                 nextTurnIndex += 1;
                 if (nextTurnIndex >= _networkManager.Server.ClientCount)
                 {
-                    Debug.Log("hosts turn afetr turn change");
                     nextTurnIndex = 0;
                 } 
             }
@@ -119,7 +131,7 @@ namespace UNO.Server
                 index++;
             }
 
-            Debug.Log("Could not find a player with the specified id");
+            Debug.LogWarning("Could not find a player with the specified id, returning 0");
             return 0;
         }
 
@@ -315,47 +327,7 @@ namespace UNO.Server
 
             if (canPlayCard)
             {
-                bool skipped = false;
-                
-                Debug.Log(card.type);
-                Debug.Log(card.secondaryType);
-                
-                if (isWild)
-                {
-                    switch (card.secondaryType)
-                    {
-                        case CardType.WILD:
-                            CardLogic.Wild(this);
-                            break;
-                        case CardType.DRAWFOUR:
-                            CardLogic.DrawFour(this);
-                            break;
-                        case CardType.SHUFFLE:
-                            CardLogic.Shuffle(this);
-                            break;
-                    }
-                }
-                else
-                {
-                    Debug.Log("Looking for a non wild card");
-                    switch (card.type)
-                    {
-                        case CardType.SKIP:
-                            Debug.Log("its a skip");
-                            skipped = true;
-                            CardLogic.Skip(this);
-                            break;
-                        case CardType.DRAWTWO:
-                            Debug.Log("its a draw 2");
-                            skipped = true;
-                            CardLogic.DrawTwo(this);
-                            break;
-                        case CardType.REVERSE:
-                            Debug.Log("its a reverse");
-                            CardLogic.Reverse(this);
-                            break;
-                    }
-                }
+                bool skipped = CardLogic.HandleCardLogic(card, this);
 
                 if (!skipped && !isWild)
                 {
@@ -463,15 +435,14 @@ namespace UNO.Server
         {
             Debug.Log("Gonna choose a new colour");
 
-            ushort clientPlayedId = ConvertTurnIndexToClientId(turnIndex);
-
             // if host played
-            if (clientPlayedId == 1)
+            if (turnIndex == 0)
             {
                 colourPickDisplay.SetActive(true);
             }
             else
             {
+                ushort clientPlayedId = ConvertTurnIndexToClientId(turnIndex);
                 Message message = Message.Create(MessageSendMode.Reliable, ServerToClientMessageId.CanSelectColour);
                 _networkManager.Server.Send(message, clientPlayedId);
             }

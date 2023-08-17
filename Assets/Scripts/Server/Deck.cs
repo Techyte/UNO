@@ -7,26 +7,10 @@ using Random = System.Random;
 
 namespace UNO.Server
 {
-    [Serializable]
     public class Deck
     {
-        public Deck(bool shuffle)
+        private List<Card> cards = new List<Card>()
         {
-            if(shuffle)
-                cards.Shuffle();
-        }
-
-        [SerializeField] private List<Card> cards = new List<Card>()
-        {
-            new Card(CardColour.NONE, CardType.WILD, CardType.WILD),
-            new Card(CardColour.NONE, CardType.WILD, CardType.WILD),
-            new Card(CardColour.NONE, CardType.WILD, CardType.WILD),
-            new Card(CardColour.NONE, CardType.WILD, CardType.WILD),
-            new Card(CardColour.NONE, CardType.WILD, CardType.DRAWFOUR),
-            new Card(CardColour.NONE, CardType.WILD, CardType.DRAWFOUR),
-            new Card(CardColour.NONE, CardType.WILD, CardType.DRAWFOUR),
-            new Card(CardColour.NONE, CardType.WILD, CardType.DRAWFOUR),
-            new Card(CardColour.NONE, CardType.WILD, CardType.SHUFFLE),
             new Card(CardColour.RED, CardType.ZERO),
             new Card(CardColour.RED, CardType.ONE),
             new Card(CardColour.RED, CardType.ONE),
@@ -127,6 +111,15 @@ namespace UNO.Server
             new Card(CardColour.YELLOW, CardType.DRAWTWO),
             new Card(CardColour.YELLOW, CardType.REVERSE),
             new Card(CardColour.YELLOW, CardType.REVERSE),
+            new Card(CardColour.NONE, CardType.WILD, CardType.WILD),
+            new Card(CardColour.NONE, CardType.WILD, CardType.WILD),
+            new Card(CardColour.NONE, CardType.WILD, CardType.WILD),
+            new Card(CardColour.NONE, CardType.WILD, CardType.WILD),
+            new Card(CardColour.NONE, CardType.WILD, CardType.DRAWFOUR),
+            new Card(CardColour.NONE, CardType.WILD, CardType.DRAWFOUR),
+            new Card(CardColour.NONE, CardType.WILD, CardType.DRAWFOUR),
+            new Card(CardColour.NONE, CardType.WILD, CardType.DRAWFOUR),
+            new Card(CardColour.NONE, CardType.WILD, CardType.SHUFFLE),
         };
 
         public Card Draw()
@@ -139,7 +132,7 @@ namespace UNO.Server
 
         public void Shuffle()
         {
-            cards.Shuffle();
+            //cards.Shuffle();
         }
     }
 

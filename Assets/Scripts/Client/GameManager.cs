@@ -218,6 +218,8 @@ namespace UNO.Client
         private void LocalPlayed(ushort cardIndex)
         {
             // TODO: Link proper local played animations/feedback
+
+            CardLogic.HandleCardLogic(player.Hand[cardIndex], this);
             
             Debug.Log("Played: " + cardIndex);
         }
@@ -238,8 +240,6 @@ namespace UNO.Client
 
         public void ChooseNewColour()
         {
-            Debug.Log("Gonna choose a new colour");
-
             colourPickDisplay.SetActive(true);
         }
 
