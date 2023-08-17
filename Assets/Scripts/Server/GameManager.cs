@@ -22,7 +22,7 @@ namespace UNO.Server
 
         public Deck Deck => deck;
         
-        private Deck deck;
+        private Deck deck = new Deck();
         
         [Header("Prefabs")]
         [SerializeField] private CardPrefabManager cardPrefabManagerBase;
@@ -30,26 +30,22 @@ namespace UNO.Server
         [Header("Assignments")]
         [SerializeField] private GameObject cardHolder;
         [SerializeField] private GameObject colourPickDisplay;
+        [SerializeField] private Button drawButton;
 
         [SerializeField] private CardPrefabManager currentCardDisplay;
         [Space]
         [Header("Readouts")]
         public int turnIndex = 0;
 
+        public Card TopCard => topCard;
+
         [SerializeField] private Card topCard;
-        [SerializeField] private CardColour currentColour;
         public TurnDirection turnDirection;
 
         private void Awake()
         {
             Instance = this;
             _networkManager = FindObjectOfType<NetworkManager>();
-            deck = new Deck();
-        }
-
-        public CardColour GetCurrentColour()
-        {
-            return currentColour;
         }
 
         public Card GetTopCard()
@@ -59,8 +55,6 @@ namespace UNO.Server
 
         private void Start()
         {
-            deck.Shuffle();
-            
             foreach (var player in _networkManager.Server.Clients)
             {
                 UNOPlayer unoPlayer = new UNOPlayer(player.Id);
@@ -103,6 +97,7 @@ namespace UNO.Server
                 nextTurnIndex += 1;
                 if (nextTurnIndex >= _networkManager.Server.ClientCount)
                 {
+                    Debug.Log("hosts turn after turn change");
                     nextTurnIndex = 0;
                 } 
             }
@@ -237,7 +232,7 @@ namespace UNO.Server
 
         private void UpdateCurrentCardDisplay()
         {
-            switch (currentColour)
+            switch (topCard.colour)
             {
                 case CardColour.NONE:
                     currentCardDisplay.cardImage.color = Color.black;
@@ -311,6 +306,24 @@ namespace UNO.Server
                     currentCardDisplay.numberText.text = "SHUFFLE";
                     break;
             }
+
+            if (players[1].CanPlayAnyCards(this))
+            {
+                drawButton.interactable = false;
+            }
+            else
+            {
+                drawButton.interactable = true;
+            }
+        }
+
+        public bool IsPlayable(Card cardToPlay, Card cardOnTop)
+        {
+            bool sameColour = cardToPlay.colour == topCard.colour;
+            bool sameType = cardToPlay.type == cardOnTop.type;
+            bool isWild = cardToPlay.type == CardType.WILD;
+            
+            return sameColour || sameType || isWild;
         }
 
         private void PlayCard(ushort playerId, int cardIndex)
@@ -318,20 +331,16 @@ namespace UNO.Server
             if(ConvertClientIdIntoTurnIndex(playerId) != turnIndex) return;
             
             Card card = players[playerId].Hand[cardIndex];
-
-            bool sameColour = card.colour == currentColour;
-            bool sameType = card.type == topCard.type;
-            bool isWild = card.type == CardType.WILD;
             
-            bool canPlayCard = sameColour || sameType || isWild;
+            bool isPlayable = IsPlayable(card, topCard);
 
-            if (canPlayCard)
+            if (isPlayable)
             {
-                bool skipped = CardLogic.HandleCardLogic(card, this);
+                bool cardManagesTurn = CardLogic.HandleCardLogic(card, this);
 
-                if (!skipped && !isWild)
+                if (!cardManagesTurn)
                 {
-                    Debug.Log("Increasing turn counter");
+                    Debug.Log("card does not manage turn so we are manually increasing it");
                     NewTurn(NextTurn(turnIndex));
                     Debug.Log(turnIndex);
                 }
@@ -339,7 +348,6 @@ namespace UNO.Server
                 players[playerId].Hand.Remove(card);
                 
                 topCard = card;
-                currentColour = card.colour;
                 if (playerId != 1)
                 {
                     ClientPlayed(playerId, (ushort)cardIndex);
@@ -359,6 +367,12 @@ namespace UNO.Server
         private void Draw(ushort playerId)
         {
             if(ConvertClientIdIntoTurnIndex(playerId) != turnIndex) return;
+
+            if (players[playerId].CanPlayAnyCards(this))
+            {
+                return;
+            }
+            
             Debug.Log("drawing a card and we have checked and they can");
             
             if (players.TryGetValue(playerId, out UNOPlayer player))
@@ -413,22 +427,22 @@ namespace UNO.Server
 
         public void ShuffleAllHands()
         {
-            List<UNOPlayer> playersToShuffle = players.Values.ToList();
-            List<Card[]> hands = new List<Card[]>();
-
-            foreach (var player in playersToShuffle)
-            {
-                hands.Add(player.Hand.ToArray());
-            }
+             List<UNOPlayer> playersToShuffle = players.Values.ToList();
+             List<Card[]> hands = new List<Card[]>();
             
-            hands.Shuffle();
-
-            foreach (var hand in hands)
-            {
-                hand.Shuffle();
-            }
-
-            // TODO: DONE Shuffle hands logic
+             foreach (var player in playersToShuffle)
+             {
+                 hands.Add(player.Hand.ToArray());
+             }
+            
+             hands.Shuffle();
+            
+             foreach (var hand in hands)
+             {
+                 hand.Shuffle();
+             }
+            
+             // TODO: DONE Shuffle hands logic
         }
 
         public void ChooseNewColour()
@@ -450,10 +464,12 @@ namespace UNO.Server
 
         public void NewColourChosen(int colourId)
         {
-            currentColour = (CardColour)colourId;
+            topCard.colour = (CardColour)colourId;
             colourPickDisplay.SetActive(false);
             
             NewTurn(NextTurn(turnIndex));
+            SendGlobalCardUpdate();
+            UpdateCards();
         }
 
         private void ClientMadeColourSelection(ushort clientThatChose, int selectedColour)
@@ -461,9 +477,11 @@ namespace UNO.Server
             if (ConvertClientIdIntoTurnIndex(clientThatChose) == turnIndex)
             {
                 Debug.Log("Client chose a colour");
-                currentColour = (CardColour)selectedColour;
+                topCard.colour = (CardColour)selectedColour;
             
                 NewTurn(NextTurn(turnIndex));
+                SendGlobalCardUpdate();
+                UpdateCards();
             }
         }
 
@@ -495,7 +513,6 @@ namespace UNO.Server
             Message message = Message.Create(MessageSendMode.Reliable, ServerToClientMessageId.Cards);
             message.AddCards(players[(ushort)playerId].Hand);
             message.AddCard(topCard);
-            message.AddUShort((ushort)currentColour);
 
             _networkManager.Server.Send(message, players[(ushort)playerId].networkClientId);
         }

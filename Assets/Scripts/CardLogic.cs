@@ -126,7 +126,7 @@ namespace UNO.General
         
         private static void Skip(ServerGameManager manager)
         {
-            manager.NewTurn(manager.NextTurn(manager.NextTurn(manager.turnIndex)));
+            SkipNextPlayer(manager);
         }
 
         private static void DrawTwo(ServerGameManager manager)
@@ -135,12 +135,17 @@ namespace UNO.General
             
             Debug.Log("Next turn: " + nextTurn);
             
-            manager.NewTurn(manager.NextTurn(manager.NextTurn(manager.turnIndex)));
-
             // plus one because 0 is not a client id and turn indexs start from 1
             UNOPlayer playerToDraw2 = manager.Players[(ushort)(nextTurn+1)];
             playerToDraw2.AddCard(manager.Deck.Draw());
             playerToDraw2.AddCard(manager.Deck.Draw());
+            
+            SkipNextPlayer(manager);
+        }
+
+        private static void SkipNextPlayer(ServerGameManager manager)
+        {
+            manager.NewTurn(manager.NextTurn(manager.NextTurn(manager.turnIndex)));
         }
 
         private static void DrawFour(ServerGameManager manager)
@@ -149,6 +154,7 @@ namespace UNO.General
             
             Debug.Log("Next turn: " + nextTurn);
 
+            SkipNextPlayer(manager);
 
             // plus one because 0 is not a client id and turn indexs start from 1
             UNOPlayer playerToDraw4 = manager.Players[(ushort)(nextTurn+1)];
@@ -158,6 +164,8 @@ namespace UNO.General
             playerToDraw4.AddCard(manager.Deck.Draw());
             
             Wild(manager);
+
+            SkipNextPlayer(manager);
         }
 
         private static void Wild(ServerGameManager manager)

@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using UNO.Enums;
 using UNO.General;
@@ -11,6 +10,15 @@ namespace UNO.Server
     {
         private List<Card> cards = new List<Card>()
         {
+            new Card(CardColour.NONE, CardType.WILD, CardType.WILD),
+            new Card(CardColour.NONE, CardType.WILD, CardType.WILD),
+            new Card(CardColour.NONE, CardType.WILD, CardType.WILD),
+            new Card(CardColour.NONE, CardType.WILD, CardType.WILD),
+            new Card(CardColour.NONE, CardType.WILD, CardType.DRAWFOUR),
+            new Card(CardColour.NONE, CardType.WILD, CardType.DRAWFOUR),
+            new Card(CardColour.NONE, CardType.WILD, CardType.DRAWFOUR),
+            new Card(CardColour.NONE, CardType.WILD, CardType.DRAWFOUR),
+            new Card(CardColour.NONE, CardType.WILD, CardType.SHUFFLE),
             new Card(CardColour.RED, CardType.ZERO),
             new Card(CardColour.RED, CardType.ONE),
             new Card(CardColour.RED, CardType.ONE),

@@ -19,13 +19,15 @@ namespace UNO.Client
         [Space] [Header("Assignments")] [SerializeField]
         private GameObject cardHolder;
         [SerializeField] private GameObject colourPickDisplay;
+        [SerializeField] private Button drawButton;
 
         [SerializeField] private CardPrefabManager currentCardDisplay;
 
         private UNOPlayer player;
 
+        public Card TopCard => topCard;
+        
         private Card topCard;
-        private CardColour currentColour;
 
         private void Awake()
         {
@@ -132,7 +134,7 @@ namespace UNO.Client
                 }
             }
             
-            switch (currentColour)
+            switch (topCard.colour)
             {
                 case CardColour.NONE:
                     currentCardDisplay.cardImage.color = Color.black;
@@ -206,6 +208,24 @@ namespace UNO.Client
                     currentCardDisplay.numberText.text = "SHUFFLE";
                     break;
             }
+
+            if (player.CanPlayAnyCards(this))
+            {
+                drawButton.interactable = false;
+            }
+            else
+            {
+                drawButton.interactable = true;
+            }
+        }
+
+        public bool IsPlayable(Card cardToPlay, Card cardOnTop)
+        {
+            bool sameColour = cardToPlay.colour == topCard.colour;
+            bool sameType = cardToPlay.type == cardOnTop.type;
+            bool isWild = cardToPlay.type == CardType.WILD;
+            
+            return sameColour || sameType || isWild;
         }
 
         private void OtherPlayerPlayed(int otherPlayerId)
@@ -268,11 +288,9 @@ namespace UNO.Client
                 Debug.Log("Received card message and actually doing something with it");
                 List<Card> cards = message.GetCards();
                 Card topCard = message.GetCard();
-                CardColour currentColour = (CardColour)message.GetUShort();
 
                 Instance.player.Hand = cards;
                 Instance.topCard = topCard;
-                Instance.currentColour = currentColour;
                 Instance.UpdateCards();
             }
         }

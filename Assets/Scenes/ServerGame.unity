@@ -615,7 +615,8 @@ MonoBehaviour:
   cardPrefabManagerBase: {fileID: 7402972068759497795, guid: 5f88bb769ad2ffb4092b2cb1192f6610,
     type: 3}
   cardHolder: {fileID: 1774361208}
-  colourPickDisplay: {fileID: 41270592}
+  colourPickDisplay: {fileID: 1401122057}
+  drawButton: {fileID: 1591264370}
   currentCardDisplay: {fileID: 7402972068165629884}
   turnIndex: 0
   topCard:
@@ -1479,7 +1480,7 @@ MonoBehaviour:
     m_PressedTrigger: Pressed
     m_SelectedTrigger: Selected
     m_DisabledTrigger: Disabled
-  m_Interactable: 1
+  m_Interactable: 0
   m_TargetGraphic: {fileID: 1591264371}
   m_OnClick:
     m_PersistentCalls:
