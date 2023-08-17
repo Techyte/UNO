@@ -55,6 +55,8 @@ namespace UNO.Server
 
         private void Start()
         {
+            deck.Shuffle();
+            
             foreach (var player in _networkManager.Server.Clients)
             {
                 UNOPlayer unoPlayer = new UNOPlayer(player.Id);

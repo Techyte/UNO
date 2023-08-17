@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using UNO.Enums;
 using UNO.General;
-using UnityEngine;
 using Random = System.Random;
 
 namespace UNO.Server
@@ -119,15 +118,6 @@ namespace UNO.Server
             new Card(CardColour.YELLOW, CardType.DRAWTWO),
             new Card(CardColour.YELLOW, CardType.REVERSE),
             new Card(CardColour.YELLOW, CardType.REVERSE),
-            new Card(CardColour.NONE, CardType.WILD, CardType.WILD),
-            new Card(CardColour.NONE, CardType.WILD, CardType.WILD),
-            new Card(CardColour.NONE, CardType.WILD, CardType.WILD),
-            new Card(CardColour.NONE, CardType.WILD, CardType.WILD),
-            new Card(CardColour.NONE, CardType.WILD, CardType.DRAWFOUR),
-            new Card(CardColour.NONE, CardType.WILD, CardType.DRAWFOUR),
-            new Card(CardColour.NONE, CardType.WILD, CardType.DRAWFOUR),
-            new Card(CardColour.NONE, CardType.WILD, CardType.DRAWFOUR),
-            new Card(CardColour.NONE, CardType.WILD, CardType.SHUFFLE),
         };
 
         public Card Draw()
@@ -140,7 +130,7 @@ namespace UNO.Server
 
         public void Shuffle()
         {
-            //cards.Shuffle();
+            cards.Shuffle();
         }
     }
 
